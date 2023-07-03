@@ -9,15 +9,14 @@
   <!-- Vue -->
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
-
 </head>
 <body>
   <div class="container mt-3" id="app">
     <h5>Youtube Channel Information</h5> 
-    <div v-for="data in data">
-      <p>{{ data.profile_picture}}</p> 
-      <p>{{ data.name}}</p> 
-      <p>{{ data.description1 }}</p>
+    <div v-for="channel in channel">
+      <p>{{ channel.profile_picture}}</p> 
+      <p>{{ channel.name}}</p> 
+      <p>{{ channel.description1 }}</p>
     </div>   
     
     <h5>List of Youtube Channel Videos</h5>
@@ -32,12 +31,12 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="data in data">
-          <td>{{ data.id }}</td>
-          <td><a :  href="'https://www.youtube.com/watch?v=' + data.video_id" target="_blank">{{ data.video_id }}</a></td>
-          <td>{{ data.video_title }}</td>
-          <td>{{ data.description }}</td>
-          <td><img :src="data.thumbnail"></td>
+        <tr v-for="video in videos" :key="video.id">
+          <td>{{ video.id }}</td>
+          <td><a :href="'https://www.youtube.com/watch?v=' + video.video_id" target="_blank">{{ video.video_id }}</a></td>
+          <td>{{ video.video_title }}</td>
+          <td>{{ video.description }}</td>
+          <td><img :src="video.thumbnail"></td>
         </tr>
       </tbody>
     </table>
@@ -48,7 +47,8 @@
     var app = new Vue({
       el: '#app',
       data: {
-        data: []
+        channel: [],
+        videos: []
       },
       mounted() {
         this.getData();
@@ -57,7 +57,10 @@
         getData() {
           fetch('youtube_channel_json.php')
             .then(response => response.json())
-            .then(data => this.data = data);
+            .then(data => {
+              this.channel = [data[0]];
+              this.videos = data.slice(1);
+            });
         }
       }
     });
