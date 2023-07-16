@@ -1,11 +1,14 @@
 <?php
 $api_key = "AIzaSyA2zwzbopw1Vdlm6zHOaeuOvm7AAxYlIuY";
+$nba = 'UCWJ2lWNubArHWmf3FIHbfcQ';
+$oneSport = 'UCXDG9ue-emCN8Ad3h7lERqQ';
 
 $servername = "localhost";
 $dbname = "youtube_db";
 $username = "root";
 $password = "";
 
+// PDO -> PHP Data Objects
 try {
   $connection = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
   // set the PDO error mode to exception
@@ -15,14 +18,16 @@ try {
   echo "Connection failed: " . $e->getMessage();
 }
 
-$url = "https://youtube.googleapis.com/youtube/v3/channels?order=date&part=snippet%2CcontentDetails%2Cstatistics&id=UCWJ2lWNubArHWmf3FIHbfcQ&key=".$api_key;
+$url = "https://youtube.googleapis.com/youtube/v3/channels?order=date&part=snippet%2CcontentDetails%2Cstatistics&id=".$oneSport."&key=".$api_key;
 
 $channel = json_decode(file_get_contents($url));
 
 foreach($channel->items as $channels) {
-  $sql = "INSERT INTO `youtube_channels` (`channel_id`, `profile_picture`, `name`, `description1`) VALUES (NULL, :profile_picture, :name, :description)";
+  $sql = "INSERT INTO `youtube_channels`(`id`, `channel_id`, `profile_picture`, `name`, `description1`) VALUES (NULL, :channel, :profile_picture, :name, :description)";
 
   $stmt = $connection->prepare($sql);
+  // binding a value to a named parameter in a prepared SQL statement.
+  $stmt->bindParam(':channel', $channels->id);
   $stmt->bindParam(':profile_picture', $channels->snippet->thumbnails->medium->url);
   $stmt->bindParam(':name', $channels->snippet->title);
   $stmt->bindParam(':description', $channels->snippet->description);
@@ -63,10 +68,10 @@ foreach($videos->items as $video){
 }
 
 // get all data from youtube_channels table
-$sql = 'SELECT * FROM youtube_channels';
+$sql = "SELECT * FROM youtube_channels WHERE channel_id='UCXDG9ue-emCN8Ad3h7lERqQ'";
 $stmt = $connection->prepare($sql);
 $stmt->execute();
-$list = $stmt->fetchAll(PDO::FETCH_OBJ);
+$list = $stmt->fetchAll(PDO::FETCH_OBJ); 
 $data = array();
 
 for ($i = 0; $i < count($list); $i++) {
